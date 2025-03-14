@@ -8,6 +8,7 @@ module RemoteSyslogLogger
       @remote_port     = remote_port
       @whinyerrors     = options[:whinyerrors]
       @max_size        = options[:max_size]
+      @sync_to_stdout  = options[:sync_to_stdout] === true
       
       @socket = UDPSocket.new
       @packet = SyslogProtocol::Packet.new
@@ -22,6 +23,11 @@ module RemoteSyslogLogger
     end
     
     def transmit(message)
+
+      if @sync_to_stdout
+        STDOUT.write(message)
+      end
+
       message.split(/\r?\n/).each do |line|
         begin
           next if line =~ /^\s*$/
